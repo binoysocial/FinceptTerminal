@@ -125,29 +125,21 @@ void AuthManager::clear_session() {
 }
 
 bool AuthManager::needs_pin_setup() const {
-    return session_.authenticated && !PinManager::instance().has_pin();
+    return false; // open-source self-hosted build — PIN not required
 }
 
 // ── Initialize ───────────────────────────────────────────────────────────────
 
 void AuthManager::initialize() {
-    set_loading(true);
-    load_session();
-
-    if (!session_.api_key.isEmpty()) {
-        // Apply api_key ONLY — do NOT send the stale session_token during
-        // startup validation. The server enforces single-session via
-        // X-Session-Token; sending a stale one triggers 401 even though
-        // the api_key is perfectly valid and permanent.
-        auto& http = fincept::HttpClient::instance();
-        http.set_auth_header(session_.api_key);
-        http.clear_session_token();
-
-        validate_saved_session();
-        return;
-    }
-
-    set_loading(false);
+    // Open-source self-hosted build: skip cloud auth entirely.
+    // The app runs fully locally — no account, no subscription, no PIN required.
+    session_.authenticated = true;
+    session_.user_info.username = "local";
+    session_.user_info.email = "local@localhost";
+    session_.user_info.account_type = "enterprise";
+    session_.subscription.account_type = "enterprise";
+    session_.has_subscription = true;
+    is_loading_ = false;
     emit auth_state_changed();
 }
 

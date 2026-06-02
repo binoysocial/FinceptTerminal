@@ -39,12 +39,17 @@ class CurrencyManager : public QObject {
     /// Switch currency: persist + emit. No-op if unchanged or unknown code.
     void set_currency(const QString& code);
 
+    /// Call on broker connect. If user never explicitly set a currency and the
+    /// broker's region is "IN", auto-switches display currency to INR.
+    void on_broker_connected(const QString& broker_region, const QString& broker_currency);
+
   signals:
     void currency_changed(const QString& code, const QString& symbol);
 
   private:
     CurrencyManager() = default;
     QString code_ = "USD";
+    bool user_set_currency_ = false; // true once user explicitly picks a currency
 };
 
 } // namespace fincept::currency
