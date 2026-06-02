@@ -118,11 +118,13 @@ jobs:
           set -euo pipefail
           VCPKG_ROOT="${VCPKG_INSTALLATION_ROOT:-C:/vcpkg}"
           echo "Using vcpkg at: $VCPKG_ROOT"
-          "$VCPKG_ROOT/vcpkg" install openssl:x64-windows --no-print-usage
+          "$VCPKG_ROOT/vcpkg" install openssl:x64-windows zlib:x64-windows --no-print-usage
           OPENSSL_DIR="$VCPKG_ROOT/installed/x64-windows"
           echo "OPENSSL_ROOT_DIR=$OPENSSL_DIR" >> "$GITHUB_ENV"
-          echo "OpenSSL installed at: $OPENSSL_DIR"
+          echo "ZLIB_ROOT=$OPENSSL_DIR" >> "$GITHUB_ENV"
+          echo "OpenSSL + zlib installed at: $OPENSSL_DIR"
           ls "$OPENSSL_DIR/lib/libcrypto.lib" && echo "libcrypto.lib confirmed"
+          ls "$OPENSSL_DIR/lib/zlib.lib" && echo "zlib.lib confirmed"
 
       # ---- Qt6 target (Windows/macOS) ----
       - name: Install Qt6
@@ -174,10 +176,15 @@ jobs:
           if [ -n "${OPENSSL_ROOT_DIR:-}" ]; then
             OPENSSL_ARG="-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}"
           fi
+          ZLIB_ARG=""
+          if [ -n "${ZLIB_ROOT:-}" ]; then
+            ZLIB_ARG="-DZLIB_ROOT=${ZLIB_ROOT}"
+          fi
           cmake -B build \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DCMAKE_PREFIX_PATH="${QT_ROOT_DIR}" \
             ${OPENSSL_ARG} \
+            ${ZLIB_ARG} \
             -DFINCEPT_REQUIRE_BUNDLED_YTDLP=ON \
             ${{ runner.os == 'macOS' && '-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache' || '' }} \
             ${{ matrix.cmake_extra }}
