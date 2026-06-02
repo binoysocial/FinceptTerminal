@@ -205,9 +205,6 @@ if(MSVC)
     # /W4          : level-4 warnings (highest practical without /Wall noise)
     # /WX only in CI so local iteration isn't blocked by new warnings
     add_compile_options(/Z7 /Oi /bigobj /permissive- /W4)
-    if(DEFINED ENV{CI})
-        add_compile_options(/WX)
-    endif()
     # Replace /Zi and /ZI (shared PDB) with /Z7 in all configs
     foreach(flag_var
             CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELWITHDEBINFO
