@@ -181,11 +181,17 @@ jobs:
           if [ -n "${VCPKG_ROOT:-}" ] && [ -f "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" ]; then
             VCPKG_TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
           fi
+          # /WX- disables warnings-as-errors on MSVC (upstream code has pre-existing warnings)
+          MSVC_FLAGS=""
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            MSVC_FLAGS="-DCMAKE_CXX_FLAGS=/WX- -DCMAKE_C_FLAGS=/WX-"
+          fi
           cmake -B build \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DCMAKE_PREFIX_PATH="${QT_ROOT_DIR}" \
             ${OPENSSL_ARG} \
             ${VCPKG_TOOLCHAIN_ARG} \
+            ${MSVC_FLAGS} \
             -DFINCEPT_REQUIRE_BUNDLED_YTDLP=ON \
             ${{ runner.os == 'macOS' && '-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache' || '' }} \
             ${{ matrix.cmake_extra }}
