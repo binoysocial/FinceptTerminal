@@ -72,7 +72,7 @@ void RbiPanel::on_fetch() {
 }
 
 void RbiPanel::on_result(const QString& request_id, const services::EconomicsResult& result) {
-    if (result.source_id != kSourceId)
+    if (result.source_id != kRbiSourceId)
         return;
     if (!result.success) {
         show_error(result.error);
