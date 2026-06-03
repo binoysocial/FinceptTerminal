@@ -37,6 +37,8 @@
 #include "screens/economics/panels/UnescoPanel.h"
 #include "screens/economics/panels/WorldBankHealthPanel.h"
 #include "screens/economics/panels/WorldBankPanel.h"
+#include "screens/economics/panels/RbiPanel.h"
+#include "screens/economics/panels/SebiPanel.h"
 #include "screens/economics/panels/WtoPanel.h"
 #include "ui/theme/Theme.h"
 #include "ui/theme/ThemeManager.h"
@@ -87,6 +89,8 @@ static const struct {
     {"unesco", "UNESCO", "#00ACC1"},
     {"bea", "BEA", "#E65100"},
     {"fincept", "Fincept Macro", "#d97706"},
+    {"rbi", "RBI India", "#FF6B00"},
+    {"sebi", "SEBI India", "#138808"},
 };
 
 // ── Panel factory ─────────────────────────────────────────────────────────────
@@ -153,6 +157,10 @@ static EconPanelBase* make_panel(const QString& id, QWidget* parent) {
         return new BeaPanel(parent);
     if (id == "fincept")
         return new FinceptMacroPanel(parent);
+    if (id == "rbi")
+        return new RbiPanel(parent);
+    if (id == "sebi")
+        return new SebiPanel(parent);
     return nullptr;
 }
 

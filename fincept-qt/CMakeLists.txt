@@ -1681,6 +1681,8 @@ set(SCREEN_SOURCES
     src/screens/economics/panels/UnescoPanel.cpp
     src/screens/economics/panels/BeaPanel.cpp
     src/screens/economics/panels/FinceptMacroPanel.cpp
+    src/screens/economics/panels/RbiPanel.cpp
+    src/screens/economics/panels/SebiPanel.cpp
 
     # Polymarket / Prediction Markets
     src/screens/polymarket/PolymarketScreen.cpp
