@@ -326,6 +326,15 @@ jobs:
           done
 
           # ----------------------------------------------------------------
+          # zlib DLL — linked via vcpkg, not shipped by Qt
+          # ----------------------------------------------------------------
+          VCPKG_BIN="${VCPKG_ROOT:-C:/vcpkg}/installed/x64-windows/bin"
+          if [ -f "${VCPKG_BIN}/zlib1.dll" ] && [ ! -f "dist/zlib1.dll" ]; then
+            cp "${VCPKG_BIN}/zlib1.dll" dist/
+            echo "Copied zlib1.dll"
+          fi
+
+          # ----------------------------------------------------------------
           # MSVC Runtime DLLs — --compiler-runtime covers most, but copy
           # from System32 as a fallback for anything missed.
           # msvcp170 / vcruntime140_2 are the VS2022 v17.x toolset DLLs.
