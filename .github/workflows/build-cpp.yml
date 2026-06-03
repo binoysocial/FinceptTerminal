@@ -326,12 +326,33 @@ jobs:
           done
 
           # ----------------------------------------------------------------
-          # zlib DLL — linked via vcpkg, not shipped by Qt
+          # zlib DLL — exe imports z.dll; search vcpkg + Qt + System32
+          # vcpkg names it zlib1.dll; copy as both zlib1.dll and z.dll
           # ----------------------------------------------------------------
           VCPKG_BIN="${VCPKG_ROOT:-C:/vcpkg}/installed/x64-windows/bin"
-          if [ -f "${VCPKG_BIN}/zlib1.dll" ] && [ ! -f "dist/zlib1.dll" ]; then
-            cp "${VCPKG_BIN}/zlib1.dll" dist/
-            echo "Copied zlib1.dll"
+          Z_DLL_SRC=""
+          for candidate in \
+            "${VCPKG_BIN}/zlib1.dll" \
+            "${VCPKG_BIN}/z.dll" \
+            "${QT_BIN}/zlib1.dll" \
+            "${QT_BIN}/z.dll" \
+            "/c/Windows/System32/z.dll"; do
+            if [ -f "$candidate" ]; then
+              Z_DLL_SRC="$candidate"
+              echo "Found zlib DLL: $candidate"
+              break
+            fi
+          done
+          if [ -n "$Z_DLL_SRC" ]; then
+            cp "$Z_DLL_SRC" dist/z.dll
+            echo "Copied $(basename $Z_DLL_SRC) -> dist/z.dll"
+          else
+            echo "::warning::z.dll / zlib1.dll not found — searching entire vcpkg tree"
+            FOUND=$(find "${VCPKG_ROOT:-C:/vcpkg}/installed/x64-windows/bin" -name "*.dll" 2>/dev/null | grep -i "zlib\|^z\." | head -1)
+            if [ -n "$FOUND" ]; then
+              cp "$FOUND" dist/z.dll
+              echo "Copied $FOUND -> dist/z.dll"
+            fi
           fi
 
           # ----------------------------------------------------------------
