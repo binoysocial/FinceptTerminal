@@ -13,16 +13,16 @@
 namespace fincept::screens {
 namespace {
 
-static constexpr const char* kScript   = "sebi_data.py";
-static constexpr const char* kSourceId = "sebi";
-static constexpr const char* kColor    = "#138808"; // India green
+static constexpr const char* kSebiScript   = "sebi_data.py";
+static constexpr const char* kSebiSourceId = "sebi";
+static constexpr const char* kSebiColor    = "#138808"; // India green
 
 struct SebiSeries {
     QString label;
     QString command;
 };
 
-static const QList<SebiSeries> kSeries = {
+static const QList<SebiSeries> kSebiSeries = {
     {"FII / DII Daily Flows",       "fii_dii"},
     {"FII / DII Monthly Flows",     "fii_dii_monthly"},
     {"Bulk Deals",                  "bulk_deals"},
@@ -33,7 +33,7 @@ static const QList<SebiSeries> kSeries = {
 
 } // namespace
 
-SebiPanel::SebiPanel(QWidget* parent) : EconPanelBase(kSourceId, kColor, parent) {
+SebiPanel::SebiPanel(QWidget* parent) : EconPanelBase(kSebiSourceId, kSebiColor, parent) {
     build_base_ui(this);
     connect(&services::EconomicsService::instance(), &services::EconomicsService::result_ready,
             this, &SebiPanel::on_result);
@@ -52,7 +52,7 @@ void SebiPanel::build_controls(QHBoxLayout* thl) {
     };
 
     series_combo_ = new QComboBox;
-    for (const auto& s : kSeries)
+    for (const auto& s : kSebiSeries)
         series_combo_->addItem(s.label);
     series_combo_->setFixedHeight(26);
     series_combo_->setMinimumWidth(220);
@@ -63,12 +63,13 @@ void SebiPanel::build_controls(QHBoxLayout* thl) {
 
 void SebiPanel::on_fetch() {
     const int idx = series_combo_->currentIndex();
-    if (idx < 0 || idx >= kSeries.size())
+    if (idx < 0 || idx >= kSebiSeries.size())
         return;
-    const auto& s = kSeries[idx];
+    const auto& s = kSebiSeries[idx];
     show_loading(tr("Fetching SEBI data: %1…").arg(s.label));
     const QString req_id = "sebi_" + s.command;
-    services::EconomicsService::instance().execute(kSourceId, kScript, s.command, {s.command}, req_id);
+    QStringList args = {s.command};
+    services::EconomicsService::instance().execute(kSebiSourceId, kSebiScript, s.command, args, req_id);
 }
 
 void SebiPanel::on_result(const QString& request_id, const services::EconomicsResult& result) {
@@ -95,8 +96,8 @@ void SebiPanel::on_result(const QString& request_id, const services::EconomicsRe
     }
 
     const int idx = series_combo_->currentIndex();
-    const QString title = (idx >= 0 && idx < kSeries.size())
-                              ? "SEBI: " + kSeries[idx].label
+    const QString title = (idx >= 0 && idx < kSebiSeries.size())
+                              ? "SEBI: " + kSebiSeries[idx].label
                               : "SEBI Data";
     display(rows, title);
     LOG_INFO("SebiPanel", QString("Displayed %1 rows for %2").arg(rows.size()).arg(title));

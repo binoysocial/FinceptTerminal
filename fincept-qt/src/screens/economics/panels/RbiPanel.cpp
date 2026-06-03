@@ -13,16 +13,16 @@
 namespace fincept::screens {
 namespace {
 
-static constexpr const char* kScript   = "rbi_data.py";
-static constexpr const char* kSourceId = "rbi";
-static constexpr const char* kColor    = "#FF6B00"; // saffron
+static constexpr const char* kRbiScript   = "rbi_data.py";
+static constexpr const char* kRbiSourceId = "rbi";
+static constexpr const char* kRbiColor    = "#FF6B00"; // saffron
 
 struct RbiSeries {
     QString label;
     QString command;
 };
 
-static const QList<RbiSeries> kSeries = {
+static const QList<RbiSeries> kRbiSeries = {
     {"Policy Rates (Repo / CRR / SLR)",  "policy_rates"},
     {"Forex Reserves (USD bn)",          "forex_reserves"},
     {"Money Supply (M3)",                "money_supply"},
@@ -32,7 +32,7 @@ static const QList<RbiSeries> kSeries = {
 
 } // namespace
 
-RbiPanel::RbiPanel(QWidget* parent) : EconPanelBase(kSourceId, kColor, parent) {
+RbiPanel::RbiPanel(QWidget* parent) : EconPanelBase(kRbiSourceId, kRbiColor, parent) {
     build_base_ui(this);
     connect(&services::EconomicsService::instance(), &services::EconomicsService::result_ready,
             this, &RbiPanel::on_result);
@@ -51,7 +51,7 @@ void RbiPanel::build_controls(QHBoxLayout* thl) {
     };
 
     series_combo_ = new QComboBox;
-    for (const auto& s : kSeries)
+    for (const auto& s : kRbiSeries)
         series_combo_->addItem(s.label);
     series_combo_->setFixedHeight(26);
     series_combo_->setMinimumWidth(240);
@@ -62,12 +62,13 @@ void RbiPanel::build_controls(QHBoxLayout* thl) {
 
 void RbiPanel::on_fetch() {
     const int idx = series_combo_->currentIndex();
-    if (idx < 0 || idx >= kSeries.size())
+    if (idx < 0 || idx >= kRbiSeries.size())
         return;
-    const auto& s = kSeries[idx];
+    const auto& s = kRbiSeries[idx];
     show_loading(tr("Fetching RBI data: %1…").arg(s.label));
     const QString req_id = "rbi_" + s.command;
-    services::EconomicsService::instance().execute(kSourceId, kScript, s.command, {s.command}, req_id);
+    QStringList args = {s.command};
+    services::EconomicsService::instance().execute(kRbiSourceId, kRbiScript, s.command, args, req_id);
 }
 
 void RbiPanel::on_result(const QString& request_id, const services::EconomicsResult& result) {
@@ -100,8 +101,8 @@ void RbiPanel::on_result(const QString& request_id, const services::EconomicsRes
     }
 
     const int idx = series_combo_->currentIndex();
-    const QString title = (idx >= 0 && idx < kSeries.size())
-                              ? "RBI: " + kSeries[idx].label
+    const QString title = (idx >= 0 && idx < kRbiSeries.size())
+                              ? "RBI: " + kRbiSeries[idx].label
                               : "RBI Data";
     display(rows, title);
     LOG_INFO("RbiPanel", QString("Displayed %1 rows for %2").arg(rows.size()).arg(title));
