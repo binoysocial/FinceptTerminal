@@ -131,6 +131,9 @@ bool AuthManager::needs_pin_setup() const {
 // ── Initialize ───────────────────────────────────────────────────────────────
 
 void AuthManager::initialize() {
+    // Load saved api_key from SecureStorage/SQLite before overwriting session fields.
+    load_session();
+
     // Open-source self-hosted build: skip cloud auth entirely.
     // The app runs fully locally — no account, no subscription, no PIN required.
     session_.authenticated = true;
@@ -140,7 +143,6 @@ void AuthManager::initialize() {
     session_.subscription.account_type = "enterprise";
     session_.has_subscription = true;
     is_loading_ = false;
-    // Apply api_key loaded by load_session() so HttpClient sends X-API-Key.
     if (!session_.api_key.isEmpty())
         apply_tokens(session_.api_key, session_.session_token);
     emit auth_state_changed();
