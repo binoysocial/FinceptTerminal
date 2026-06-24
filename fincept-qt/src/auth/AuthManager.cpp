@@ -140,6 +140,9 @@ void AuthManager::initialize() {
     session_.subscription.account_type = "enterprise";
     session_.has_subscription = true;
     is_loading_ = false;
+    // Apply api_key loaded by load_session() so HttpClient sends X-API-Key.
+    if (!session_.api_key.isEmpty())
+        apply_tokens(session_.api_key, session_.session_token);
     emit auth_state_changed();
 }
 
